@@ -12,11 +12,11 @@ jobs:
     - name: Build the Vote Image
       run: docker build -t example-voting-app-vote:latest ./vote
 
-    - name: Scan Image with Sysdig
-      uses: sysdiglabs/scan-action@v5
-      with:
-        image-tag: example-voting-app-vote:latest
-        sysdig-secure-token: ${{ secrets.SECURE_API_TOKEN }}
-        sysdig-secure-url: https://us4.app.sysdig.com
-        stop-on-failed-policy: false
-        input-type: docker-daemon
+    # REPLACED: We are running the scanner directly to avoid wrapper errors
+    - name: Scan Image Manually
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+        quay.io/sysdig/secure-inline-scan:2 \
+        --sysdig-url https://us4.app.sysdig.com \
+        --sysdig-token ${{ secrets.SECURE_API_TOKEN }} \
+        example-voting-app-vote:latest
